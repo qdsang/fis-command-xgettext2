@@ -1,6 +1,6 @@
 {
   "name": "fis-command-xgettext2",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "xgettext",
   "main": "index.js",
   "scripts": {
