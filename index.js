@@ -1,11 +1,8 @@
-/*
- * fis
- * http://fis.baidu.com/
- */
 
 'use strict';
 var i18n_entries = [];
 var PO = require('node-po-ext');
+var stable = require("stable");
 
 exports.name = 'xgettext2';
 exports.usage = '<command> [options]';
@@ -85,15 +82,28 @@ function write(path, content, i18n_entries){
     var po = PO.parse(content);
     var items = po.items;
     var res = {};
-    
+    var msgids = [];
+
     for (var i = 0, len = items.length; i < len; i++) {
-        var item = items[i];
-        res[item.msgid] = item.msgstr[0];
-        i18n_entries.push(item.msgid);
+        var item = items[i], msgid = item.msgid;
+        msgids.push(msgid);
+    }
+    for (var i = 0, len = i18n_entries.length; i < len; i++) {
+        var msgid = i18n_entries[i];
+        if (msgids.indexOf(msgid) == -1) {
+            console.log('new msgid "' + msgid + '"');
+        }
+    }
+
+    for (var i = 0, len = items.length; i < len; i++) {
+        var item = items[i], msgid = item.msgid;
+        res[msgid] = item.msgstr[0];
+        i18n_entries.push(msgid);
+        msgids.push(msgid);
     }
 
     i18n_entries = unique(i18n_entries);
-    i18n_entries.sort(function(a, b){return a.length >= b.length; });
+    stable(i18n_entries);
 
     var po_content = [
         'msgid ""',
