@@ -47,6 +47,15 @@ function run(options) {
     //require 
     require(conf);
 
+    // 保证内嵌文件也能被检查到
+    var roadmapPath = fis.config.get('roadmap.path') || [];
+    for (var i = 0; i < roadmapPath.length; i++) {
+        if (roadmapPath[i].isJsLike || roadmapPath[i].isJsonLike) {
+            delete roadmapPath[i].release;
+        }
+    }
+    fis.config.set('roadmap.path', roadmapPath);
+
     var files = fis.project.getSource();
     var pofiles = [];
 
