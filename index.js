@@ -11,7 +11,8 @@ exports.desc = 'xgettext2';
 exports.register = function(commander) {
     commander
         .option('-f, --file <names>', 'output file', String, 'message')
-        .action(function(){
+        .option('-o, --optimize', 'Cleanup unnecessary words', Boolean, false)
+        .action(function(opts){
             var options = arguments[arguments.length - 1];
             run(options);
         });
@@ -47,7 +48,6 @@ function run(options) {
     //require 
     require(conf);
 
-    // 保证内嵌文件也能被检查到
     var roadmapPath = fis.config.get('roadmap.path') || [];
     for (var i = 0; i < roadmapPath.length; i++) {
         if (roadmapPath[i].isJsLike || roadmapPath[i].isJsonLike) {
@@ -78,25 +78,28 @@ function run(options) {
     if (pofiles.length) {
         for (var i = 0; i < pofiles.length; i++) {
             var item = pofiles[i];
-            write(item.realpath, item.getContent(), i18n_entries.slice(0));
+            write(item.realpath, item.getContent(), i18n_entries.slice(0), options);
         }
     } else {
-        write(root + '/message.po', '', i18n_entries.slice(0));
+        write(root + '/message.po', '', i18n_entries.slice(0), options);
     }
 
     console.log('ok!');
 }
 
-function write(path, content, i18n_entries){
+function write(path, content, i18n_entries, options){
     var po = PO.parse(content);
     var items = po.items;
     var res = {};
     var msgids = [];
 
+    // 获取全部已有word
     for (var i = 0, len = items.length; i < len; i++) {
         var item = items[i], msgid = item.msgid;
         msgids.push(msgid);
     }
+
+    // 输出 new word
     for (var i = 0, len = i18n_entries.length; i < len; i++) {
         var msgid = i18n_entries[i];
         if (msgids.indexOf(msgid) == -1) {
@@ -104,11 +107,15 @@ function write(path, content, i18n_entries){
         }
     }
 
+    // 
     for (var i = 0, len = items.length; i < len; i++) {
         var item = items[i], msgid = item.msgid;
         res[msgid] = item.msgstr[0];
-        i18n_entries.push(msgid);
-        msgids.push(msgid);
+        
+        if (!options.optimize) {
+            i18n_entries.push(msgid);
+        }
+        //msgids.push(msgid);
     }
 
     i18n_entries = unique(i18n_entries);
@@ -141,7 +148,7 @@ function write(path, content, i18n_entries){
     
     // console.log(path + ' ' + po_content);
     // return ;
-    console.log('write file: ' + path);
+    console.log('update file: ' + path);
     fis.util.write(path, po_content, 'utf-8');
 }
 
