@@ -148,7 +148,7 @@ function write(path, content, i18n_entries, options){
     
     // console.log(path + ' ' + po_content);
     // return ;
-    console.log('update file: ' + path);
+    console.log('write file: ' + path);
     fis.util.write(path, po_content, 'utf-8');
 }
 
@@ -172,7 +172,7 @@ function parse(content, file) {
     var reg;
 
     if (file.isJsLike || file.isHtmlLike) {
-        reg = /"(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|(\/\/[^\r\n\f]+|\/\*[\s\S]*?(?:\*\/|$))|\b(__)\(\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*')\s*\)/g;
+        reg = /"(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|(\/\/[^\r\n\f]+|\/\*[\s\S]*?(?:\*\/|$))|\b(__)\(\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*')\s*(\)|\,)/g;
         content.replace(reg, function(m, comment, type, value) {
             if (value) {
                 var info = fis.util.stringQuote(value);
